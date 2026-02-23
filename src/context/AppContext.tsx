@@ -57,7 +57,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         
     };
 
-    // ✅ FETCH USER ON REFRESH
+    // FETCH USER ON REFRESH
     const fetchUser = async (token: string) => {
         try {
             const { data } = await api.get('/api/users/me', {headers: { Authorization: `Bearer ${token}` }})
@@ -67,7 +67,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
             setOnboardingCompleted(true);
         }
      
-        api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`;
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } catch (error: any) {
         console.log(error);
             toast.error(error?.response?.data?.error?.message || error?.message)
