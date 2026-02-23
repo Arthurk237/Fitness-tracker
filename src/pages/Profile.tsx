@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import api from "../configs/api";
 
 const Profile=() => {
-  const {user, logout , fetchUser, allFoodLogs, allActivityLogs} = useAppContext();
+  const {user, setUser, logout , allFoodLogs, allActivityLogs} = useAppContext();
   const {theme, toggleTheme} = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({age: 0, weight: 0 , height: 0, goal: 'maintain', dailyCaloriesIntake: 2000, dailyCaloriesBurn: 400})
@@ -38,15 +38,41 @@ const Profile=() => {
   }, [user])
 
   const handleSave = async () => {
+    const payload = {
+      age: Number(formData.age),
+      weight: Number(formData.weight),
+      height: Number(formData.height),
+      goal: formData.goal as 'lose' | 'maintain' | 'gain',
+      dailyCaloriesIntake: Number(formData.dailyCaloriesIntake),
+      dailyCaloriesBurn: Number(formData.dailyCaloriesBurn),
+    };
+
+    const isInvalidNumber = Object.values(payload)
+      .filter((value) => typeof value === 'number')
+      .some((value) => Number.isNaN(value));
+
+    if (
+      isInvalidNumber ||
+      payload.age < 13 ||
+      payload.age > 120 ||
+      payload.weight <= 0 ||
+      payload.height <= 0
+    ) {
+      return toast.error("Please enter valid profile data");
+    }
+
+    if (!user?.id) {
+      return toast.error("User not found. Please login again.");
+    }
     try{
-      await api.put('/api/users/me', {data: formData})
-      await fetchUser(user?.token || '')
+      const { data } = await api.put(`/api/users/${user.id}`, payload)
+      setUser((prevUser) => (prevUser ? { ...prevUser, ...data } : prevUser));
       toast.success('Profile updated successfully')
+      setIsEditing(false)
     } catch(error:any){
       console.log(error)
-      toast.error(error?.message || "Failed to update profile");
+      toast.error(error?.response?.data?.error?.message || error?.message || "Failed to update profile");
     }
-    setIsEditing(false)
   }
 
   const getStats = () => {
