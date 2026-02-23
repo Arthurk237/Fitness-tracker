@@ -47,7 +47,6 @@ const FoodLog = () => {
       toast.error(error?.response?.data?.error?.message || error?.message)
     
     }
-
     setFormData({name: '', calories: 0, mealType: ''})
     setShowForm(false)
   }
@@ -81,14 +80,15 @@ const FoodLog = () => {
   }
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if(!file) return;
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('image', file);
-    try{
-      const {data} = await api.post('/api/image-analysis', formData);
-      const result = data.result;
+  const file = e.target.files?.[0];
+  if(!file) return;
+  setLoading(true);
+  const formData = new FormData();
+  formData.append('images', file);
+  try{
+    const {data} = await api.post('/api/image-analysis', formData);
+    const result = data.result;
+
       let mealType = '';
       const hour = new Date().getHours()
       if (hour >= 0 && hour < 12){
