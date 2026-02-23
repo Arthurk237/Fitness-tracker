@@ -34,16 +34,20 @@ const ActivityLog=() => {
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      if(formData.name.trim() || formData.duration <= 0){
-        return toast('Please enter valid data')
+    if (!formData.name.trim() || formData.duration <= 0 || formData.calories <= 0) {
+        setError('Please enter valid data');
+        return toast.error('Please enter valid data');
       }
       try{
-        const {data} = await api.post('/api/activity-logs', {data: formData})
+        const { data } = await api.post('/api/activity-logs', { data: formData })
+         setAllActivityLogs(prev => [ ...prev, data])
         setFormData({name: '', duration: 0, calories: 0})
+        setError('')
         setShowForm(false)
       } catch (error: any){
         console.log(error)
-        toast.error(error?.message || "Failed to add activity");
+        toast.error(error?.response?.data?.error?.message || error?.message || "Failed to add activity");
+
 
       }
     }
